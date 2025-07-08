@@ -1,3 +1,45 @@
+/**
+ * std::atoi
+ * 
+ * Advantages:
+ * - Simple to use for quick integer conversions.
+ * - No exceptions or errno to manage.
+ * 
+ * Disadvantages:
+ * - Returns 0 on failure, which is ambiguous (e.g., "0" vs "foo").
+ * - Provides no way to detect parse errors or overflow.
+ * - Not recommended for robust or production-level code.
+ * 
+ *
+ * std::strtol
+ * 
+ * Advantages:
+ * - Detects parsing errors using `endptr` and `errno`.
+ * - Supports various numeric bases (e.g., decimal, hex, octal).
+ * - Doesn't throw exceptions — suitable for embedded/low-level use.
+ * - Allows partial parsing (e.g., stopping at first non-numeric character).
+ * 
+ * Disadvantages:
+ * - Verbose: requires more boilerplate (e.g., managing `errno`, `endptr`).
+ * - Uses C-style strings and pointers (not idiomatic in modern C++).
+ * - Must manually check for leftover characters and range errors.
+ * 
+ * 
+ * std::stoi (C++11 and newer)
+ *
+ * Advantages:
+ * - Works directly with std::string.
+ * - Throws clear exceptions (`std::invalid_argument`, `std::out_of_range`).
+ * - Cleaner syntax than strtol for many use cases.
+ * - Overloads available for long, float, double, etc. (`std::stol`, `std::stod`, etc.).
+ * 
+ * Disadvantages:
+ * - Uses exceptions, which may be undesirable in performance-critical code.
+ * - Does not auto-detect base (e.g., "0x10" not treated as hex by default).
+ * - Slightly slower than strtol due to exception handling overhead.
+ */
+
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -6,11 +48,9 @@ int main()
 {
     auto value = std::getenv("KITTY_PID");
 
-    // std::stoi
-    // - convenient implicit cast happening for me from const char* to std::string&
-    // - temporary allocation happening, may want to consider something else in tight loops
-    // - convenient exception object for try/catch
-
+    /**
+     * stoi
+     */
     if (value)
     {
         try
@@ -31,11 +71,9 @@ int main()
         std::cout << "error in getting KITTY_PID" << std::endl;
     }
 
-    // std::atoi
-    // not very robust, no way to tell between success/failure if return value was 0
-    // no error reporting to errno, no exception objects
-    // would have to add more processing on 'value' prior to calling atoi but not practical
-
+    /**
+     * atoi
+     */
     if (value)
     {
         int value_to_integer = std::atoi(value);
@@ -46,11 +84,9 @@ int main()
         std::cout << "error in getting KITTY_PID" << std::endl;
     }
 
-    // std::strtol
-    // - not very idiomatic in C++, uses char* for example
-    // - more involved since i need to check errno
-    // - flexible handling of bases, it does work w/ C-style and partial strings though
-
+    /**
+     * strtol
+     */
     if (value)
     {
         char* end;
